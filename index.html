@@ -964,15 +964,14 @@
 
     function colorForId(id){return `linear-gradient(180deg,hsl(${(id*40)%360} 70% 48%),hsl(${(id*40+30)%360} 60% 35%))`}
 
-// --- CORRECT DECLARATION AT TOP OF SCRIPT (Around Line 967) ---
+// --- CORRECT GLOBAL DECLARATIONS (Around Line 967) ---
 
-// This constant is fine, keep it:
 const RENDER_SERVER_URL = "https://mini-royale-backend-4rrg.onrender.com"; 
 
-// 💥 FIX THIS: The variable must be declared with 'let' and initialized simply.
+// 💥 FIX: MUST be 'let' and initialized to null. 💥
 let socket = null; 
 
-// --- DELETE ALL OTHER CODE IN THIS AREA (LIKE { transports: ['websocket'] }) ---
+// DELETE any other code block that was defining listeners here.
 // The connection listeners belong inside initMultiplayer or setupFriendRequestListeners!
 socket.on('connect', () => { 
     console.log('✅ Successfully connected to the live Mini Royale Server!'); 
@@ -3000,6 +2999,7 @@ function initMultiplayer() {
 </body>
 </html>
 </html>
+
 
 
 
