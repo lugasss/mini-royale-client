@@ -1248,6 +1248,8 @@ function searchUsers(query) {
 } // <--- Make sure this is the only brace closing the function
   // and that no extra braces follow it before the next function definition.
 
+// --- FRIENDS SYSTEM FUNCTIONS (LINES 1251 onwards) ---
+
     function findMockUser(query) {
         if (!query) return null;
         const lowerQuery = query.toLowerCase().trim();
@@ -1273,7 +1275,6 @@ function searchUsers(query) {
     }
     
     // 1. Emit the request to the server to handle the friend request
-    // The server will perform the actual lookup and validation.
     socket.emit('sendFriendRequest', { 
         targetIdOrUsername: targetIdOrUsername,
         senderId: globalState.playerID 
@@ -1303,17 +1304,6 @@ function setupFriendRequestListeners() {
         });
     }
 }
-
-
-        if (globalState.friendsList.some(f => f.id === userToAdd?.id)) {
-            alert(`You are already friends with ${userToAdd.username}!`);
-            return;
-        }
-
-        if (globalState.blockedList.some(b => b.id === userToAdd?.id)) {
-            alert(`${userToAdd.username} is blocked! Unblock them first.`);
-            return;
-        }
 
     function unfriend(friendId) {
         if (confirm("Are you sure you want to remove this player?")) {
@@ -3004,5 +2994,6 @@ function initMultiplayer() {
 </body>
 </html>
 </html>
+
 
 
