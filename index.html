@@ -966,20 +966,17 @@
 
 // --- CORRECT GLOBAL DECLARATIONS (Around Line 967) ---
 
+// --- CORRECT GLOBAL DECLARATIONS (Around Line 967) ---
+
+// Line 969: Keep the server URL constant
 const RENDER_SERVER_URL = "https://mini-royale-backend-4rrg.onrender.com"; 
 
-// 💥 FIX: MUST be 'let' and initialized to null. 💥
+// Line 972: FIX: MUST be 'let' and initialized to null.
+// This resolves the 'Assignment to constant variable' error at line 2375.
 let socket = null; 
 
-// DELETE any other code block that was defining listeners here.
-// The connection listeners belong inside initMultiplayer or setupFriendRequestListeners!
-
-socket.on('disconnect', () => { console.log('❌ Disconnected from server.'); });
-socket.on('matchStart', (data) => { console.log('Match started with data:', data); });
-socket.on('opponentPlaceCard', (data) => { handleOpponentPlay(data); });
-socket.on('matchEnd', (data) => { handleMatchEnd(data); });
-socket.on('error', (data) => { console.error('Socket Error:', data); });
-// END OF NEW BLOCK
+// DELETE everything from line 976 downwards (socket.on('disconnect', ...)) 
+// until the next function definition. The listeners must live in initMultiplayer().
 
     const poolGrid=document.getElementById('poolGrid');
     const deckSlotsEl=document.getElementById('deckSlots');
@@ -2997,6 +2994,7 @@ function initMultiplayer() {
 </body>
 </html>
 </html>
+
 
 
 
