@@ -1315,24 +1315,6 @@ function setupFriendRequestListeners() {
             return;
         }
 
-        if (userToAdd) {
-            // Mock: Request sent and instantly accepted
-            globalState.friendsList.push({
-                id: userToAdd.id,
-                username: userToAdd.username,
-                profilePic: userToAdd.profilePic,
-                trophies: userToAdd.trophies,
-                status: 'online' 
-            });
-            document.getElementById('friendInput').value = '';
-            saveGameData();
-            renderFriendsList();
-            alert(`Friend Request sent to and accepted by ${userToAdd.username}! They are now on your friends list.`);
-        } else {
-            alert(`No player found with username or ID: ${query}`);
-        }
-    }
-
     function unfriend(friendId) {
         if (confirm("Are you sure you want to remove this player?")) {
             globalState.friendsList = globalState.friendsList.filter(f => f.id !== friendId);
@@ -3022,4 +3004,5 @@ function initMultiplayer() {
 </body>
 </html>
 </html>
+
 
