@@ -1258,18 +1258,52 @@ function searchUsers(query) {
     }
 
     function addFriendFromInput() {
-        const query = document.getElementById('friendInput').value;
-        const userToAdd = findMockUser(query);
+    const friendInput = document.getElementById('friendInput');
+    const targetIdOrUsername = friendInput.value.trim();
 
-        if (!query) {
-             alert('Please enter a username or ID.');
-             return;
-        }
+    if (!targetIdOrUsername) {
+        alert('Please enter a username or ID.');
+        return;
+    }
 
-        if (userToAdd && userToAdd.isUser) {
-            alert('That is your own ID/Username!');
-            return;
-        }
+    // CRITICAL: Checks for the active connection before sending the request
+    if (!socket || !socket.connected) {
+        alert('Cannot send request: You must be connected to the multiplayer server. Try starting a game first.');
+        return;
+    }
+    
+    // 1. Emit the request to the server to handle the friend request
+    // The server will perform the actual lookup and validation.
+    socket.emit('sendFriendRequest', { 
+        targetIdOrUsername: targetIdOrUsername,
+        senderId: globalState.playerID 
+    });
+
+    // 2. Clear input and give immediate feedback
+    friendInput.value = '';
+    alert(`Friend request sent to ${targetIdOrUsername}. Awaiting server confirmation!`);
+}
+
+function setupFriendRequestListeners() {
+    if (socket) {
+        // 1. SUCCESS Listener: The server confirms the friend was added
+        socket.on('friendRequestAccepted', (newFriendData) => {
+            if (!globalState.friendsList.some(f => f.id === newFriendData.id)) {
+                globalState.friendsList.push(newFriendData);
+                saveGameData();
+                renderFriendsList();
+                renderChatSidebar();
+                alert(`🎉 ${newFriendData.username} accepted your friend request!`);
+            }
+        });
+
+        // 2. FAILURE Listener: The server reports an error (e.g., user not found)
+        socket.on('friendRequestFailed', (message) => {
+            alert(`Friend Request Failed: ${message}`);
+        });
+    }
+}
+
 
         if (globalState.friendsList.some(f => f.id === userToAdd?.id)) {
             alert(`You are already friends with ${userToAdd.username}!`);
@@ -2350,56 +2384,73 @@ function searchUsers(query) {
     }
 
 
-    // --- MULTIPLAYER SETUP ---
-    function initMultiplayer() {
-        if(currentDeck.filter(Boolean).length !== 8) {
-            alert("Your deck must have exactly 8 cards to play!");
-            changeView('deck');
-            return;
-        }
-        
-        isConnecting = true; 
-        updateButtonStates();
-
-        renderArena('Starting Match Simulation...');
-        
-        // Reset game state 
-        gameState.timer = 180;
-        gameState.elixir = 5.0;
-        gameState.placedUnits = [];
-        gameState.placementBoundary = 0.5;
-        gameState.towers.player = JSON.parse(JSON.stringify(towerConfig));
-        gameState.towers.opponent = JSON.parse(JSON.stringify(towerConfig));
-        gameEnded = false;
-        selectedCardId = null; 
-        
-        // Card Cycling Setup
-        const shuffledDeck = shuffleArray([...currentDeck.filter(Boolean)]);
-        
-        gameState.playerHand = shuffledDeck.slice(0, 4); 
-        gameState.drawPile = shuffledDeck.slice(4); 
-        gameState.discardPile = [];
-
-
-        // Simulate a successful connection and match start after a delay
-        setTimeout(() => {
-            console.log('Mock Connected to server! Match starting.');
-            
-            isConnecting = false;
-            isInMatch = true; 
-            updateButtonStates();
-
-            gameStartSound.currentTime = 0;
-            gameStartSound.play().catch(e => console.log("Sound play prevented: ", e));
-            displayStatusMessage('Match Started! Go!', 3000);
-
-            renderHand();
-
-            gameClockInterval = setInterval(updateGameClock, 1000); 
-            elixirInterval = setInterval(updateElixir, 1000); 
-            gameLogicInterval = setInterval(updateGameLogic, 1000/60); 
-        }, 1000); 
+// --- MULTIPLAYER SETUP ---
+function initMultiplayer() {
+    // 1. Validation Check 
+    if(currentDeck.filter(Boolean).length !== 8) {
+        alert("Your deck must have exactly 8 cards to play!");
+        changeView('deck');
+        return;
     }
+    
+    // 2. SOCKET INITIALIZATION (New Live Logic)
+    if (socket) {
+        // Disconnect any existing socket before creating a new one
+        socket.disconnect(); 
+    }
+    
+    // Connect to the live server
+    socket = io(RENDER_SERVER_URL, { 
+        query: {
+            playerId: globalState.playerID // Sends your player ID
+        }
+    });
+
+    // Setup listeners for the new Friends System logic
+    setupFriendRequestListeners(); 
+    
+    // 3. Socket Event Handlers (Replacing the Mock Timeout)
+    socket.on('connect', () => { 
+        console.log('✅ Connected to live Mini Royale Server! (ID: ' + socket.id + ')'); 
+        displayStatusMessage('Connected! Searching for opponent...', 3000);
+    });
+
+    socket.on('disconnect', () => { 
+        console.log('❌ Disconnected from server.'); 
+        displayStatusMessage('Lost connection to server.', 3000);
+        isInMatch = false;
+        isConnecting = false;
+        updateButtonStates();
+    });
+
+    // You will need a listener here: socket.on('matchFound', ...) to start the game!
+    
+    // 4. Client State Setup (Stays the same)
+    isConnecting = true; 
+    updateButtonStates();
+
+    renderArena('Starting Match Simulation...');
+    
+    // Reset game state 
+    gameState.timer = 180;
+    gameState.elixir = 5.0;
+    gameState.placedUnits = [];
+    gameState.placementBoundary = 0.5;
+    gameState.towers.player = JSON.parse(JSON.stringify(towerConfig));
+    gameState.towers.opponent = JSON.parse(JSON.stringify(towerConfig));
+    gameEnded = false;
+    selectedCardId = null; 
+    
+    // Card Cycling Setup
+    const shuffledDeck = shuffleArray([...currentDeck.filter(Boolean)]);
+    gameState.playerHand = shuffledDeck.slice(0, 4); 
+    gameState.drawPile = shuffledDeck.slice(4); 
+    gameState.discardPile = [];
+
+
+    // 💥 The old setTimeout block that simulated the connection has been REMOVED!
+    // The game logic will now wait for a server event to truly start the match.
+}
 
     // --- CLICK-TO-SELECT / CLICK-TO-PLACE LOGIC ---
     arenaEl.addEventListener('click', (e) => {
@@ -2970,3 +3021,5 @@ function searchUsers(query) {
   </script>
 </body>
 </html>
+</html>
+
