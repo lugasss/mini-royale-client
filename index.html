@@ -973,9 +973,7 @@ let socket = null;
 
 // DELETE any other code block that was defining listeners here.
 // The connection listeners belong inside initMultiplayer or setupFriendRequestListeners!
-socket.on('connect', () => { 
-    console.log('✅ Successfully connected to the live Mini Royale Server!'); 
-});
+
 socket.on('disconnect', () => { console.log('❌ Disconnected from server.'); });
 socket.on('matchStart', (data) => { console.log('Match started with data:', data); });
 socket.on('opponentPlaceCard', (data) => { handleOpponentPlay(data); });
@@ -2999,6 +2997,7 @@ function initMultiplayer() {
 </body>
 </html>
 </html>
+
 
 
 
