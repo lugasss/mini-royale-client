@@ -1246,14 +1246,14 @@ function searchUsers(query) {
 
 // --- FRIENDS SYSTEM FUNCTIONS (LINES 1251 onwards) ---
 
-    function findMockUser(query) {
-        if (!query) return null;
-        const lowerQuery = query.toLowerCase().trim();
-        return MOCK_FRIENDS_POOL.find(user => 
-            user.id.toLowerCase() === lowerQuery || 
-            user.username.toLowerCase() === lowerQuery
-        );
-    }
+function findMockUser(query) {
+        if (!query) return null;
+        const lowerQuery = query.toLowerCase().trim();
+        return MOCK_FRIENDS_POOL.find(user => 
+            user.id.toLowerCase() === lowerQuery || 
+            user.username.toLowerCase() === lowerQuery
+        );
+    } // <--- 💥 ADD THIS CLOSING BRACE HERE!
 
     function addFriendFromInput() {
     const friendInput = document.getElementById('friendInput');
@@ -2993,6 +2993,7 @@ function initMultiplayer() {
 </body>
 </html>
 </html>
+
 
 
 
