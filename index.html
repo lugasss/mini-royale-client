@@ -967,9 +967,7 @@
 // 1. ADD THIS BLOCK AT THE TOP OF YOUR JAVASCRIPT:
 const RENDER_SERVER_URL = "https://mini-royale-backend-4rrg.onrender.com"; 
 
-const socket = io(RENDER_SERVER_URL, { 
-    transports: ['websocket'] 
-});
+let socket = null;
 
 socket.on('connect', () => { 
     console.log('✅ Successfully connected to the live Mini Royale Server!'); 
@@ -2371,12 +2369,15 @@ function initMultiplayer() {
         socket.disconnect(); 
     }
     
-    // Connect to the live server
+  // Inside initMultiplayer()
+// ...
+    // 1. Initialize the Socket Connection
     socket = io(RENDER_SERVER_URL, { 
         query: {
             playerId: globalState.playerID // Sends your player ID
         }
     });
+// ...
 
     // Setup listeners for the new Friends System logic
     setupFriendRequestListeners(); 
@@ -2994,6 +2995,7 @@ function initMultiplayer() {
 </body>
 </html>
 </html>
+
 
 
 
