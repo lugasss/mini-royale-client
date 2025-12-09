@@ -2372,12 +2372,15 @@ function initMultiplayer() {
     // 1. Initialize the Socket Connection
    // --- CORRECTION B: Inside initMultiplayer() (Around Line 2375) ---
 
+// --- CRITICAL CORRECTION: Inside initMultiplayer() (Around Line 2375) ---
+
 socket = io(RENDER_SERVER_URL, {
-    // 💥 ADD THIS BLOCK 💥
     transports: ['websocket', 'polling'], 
     query: {
-        playerId: globalState.playerID // Sends your player ID
-    }
+        playerId: globalState.playerID 
+    },
+    // 💥 ADD THIS MATCHING LINE 💥
+    path: '/ws/' 
 });
 // ...
 
@@ -2997,6 +3000,7 @@ socket = io(RENDER_SERVER_URL, {
 </body>
 </html>
 </html>
+
 
 
 
